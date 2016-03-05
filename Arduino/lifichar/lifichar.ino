@@ -1,7 +1,9 @@
 
 int led = 2;
 
-int sensorLed = 0;
+//int sensorLed = 0;
+
+int sensorLed = analogRead(0);
 
 int currentBit = 0;
 
