@@ -20,6 +20,10 @@
   "homepage": "https://github.com/jordankid93/BLECrazyflie_NodeJS",
   "dependencies": {
     "bufferpack": "0.0.6",
+    "cylon": "^1.2.0",
+    "cylon-ble": "^0.10.1",
+    "cylon-firmata": "^0.23.0",
+    "cylon-leapmotion": "^0.20.0",
     "noble": "^1.1.0"
   },
   "devDependencies": {
