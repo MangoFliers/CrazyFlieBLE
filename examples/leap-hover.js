@@ -3,7 +3,7 @@
 var cfble = require('../index.js');
 var Cylon = require("cylon");
 
-var activated = false;
+var detected = false;
 var cf;
 
 var cflieCB = function(err, crf) {
@@ -14,37 +14,12 @@ var cflieCB = function(err, crf) {
   }
 
   console.log("CrazyFlie connected.");
-  activated = true;
+  detected = true;
 
   cf = crf;
 
   cf.setThrust(0);
   cf.start();
-}
-
-// Test function that tells the crazyflie to hover for 10 seconds
-var hover = function(err, cf) {
-
-  cf.setThrust(100); // Adjust as needed
-  console.log("Thrust now set to: " + cf.thrust);
-
-  cf.start();
-  console.log('Crazyflie now starting...');
-
-  cf.sendParam(11, 'b', 1); // Set the hover param
-  
-  var i = 20; // 20 seconds
-  i *= 2; // double it since we are sending every half a second
-  var interval = setInterval(function(){ // Send 32767 to make CF hover
-    cf.sendAll(0, 0, 0, 32767);
-    i--;
-    if(i == 0){
-      clearInterval(interval);
-      cf.sendParam(11, 'b', 0); // Clear the hover param
-      cf.stop();
-      console.log('Crazyflie now stopping...');
-    }
-  }, 500);
 };
 
 var cflie = cfble.Crazyflie(cflieCB);
@@ -60,47 +35,78 @@ Cylon.robot({
 
   work: function(my) {
 
-    var hovering = false;
-    var detected = false;
+    var interval;
+    var activated = false;
     var p = 0, r = 0, y = 0, t = 0;
 
     var fc = 0;
 
     console.log('Now listening for leap');
 
+    var controlState = {
+      p: 0,
+      r: 0,
+      y: 0,
+      t: 0,
+
+      send: function() {
+        cf.sendAll(this.r, this.p, this.y, this.t);
+        console.log(this.r, this.p, this.y, this.t);
+      },
+
+      update: function(r, p, y, t) {
+        this.r = r;
+        this.p = p;
+        this.y = y;
+        this.t = t;
+      },
+
+      start: function() {
+        var sAll = this.send.bind(this);
+        setInterval(function() {
+          sAll();
+        }, 500);
+      }
+    }
+
     my.leapmotion.on("frame", function(frame) {
       
-      if(!activated) {
-        return;
-      }
+      // y += 1;
+      if(detected) {
+        if(!activated) {
+          activated = true;
+          controlState.start();
+          console.log('starting interval');
+          cf.sendParam(11, 'b', 1);
 
-      if(fc++ % 10 != 0) {
-        return;
-      }
+          // interval = setInterval(function() {
+          //     console.log(r,p,y,t);
+          //     cf.sendAll(r, p, y, t);
+          // }, 200);
+        }
 
-      if(frame.hands.length > 0) {
+        if(frame.hands.length > 0) {
 
-        if(detected) {
-          return;
+          t = 32767;
+
+          var palm = frame.hands[0].palmNormal;
+
+          // console.log(palm);
+          var rawRoll  = palm[0];
+          var rawPitch = palm[2];
+
+          r = rawRoll * 100;
+          p = rawPitch * 100;
+
+
         }
 
         else {
-          detected = true;
-          t = 100;
-          cf.sendParam(11, 'b', 1);
+            t = 0;
         }
+
+        controlState.update(r, p, y, t);
       }
-
-      else {
-
-        if(detected) {
-          t = 0;
-          cf.sendParam(11, 'b', 0);
-          detected = false;
-        }
-      }
-
-      cf.sendAll(r, p, y, t);
 
     });
   }
