@@ -1,16 +1,16 @@
 # Crazyflie Bluetooth Low-Energy Node.js Module
 
 ## About
-crazyflie-ble is a Node.js based interface for communicating with
+CrazyFlieBLE is a Node.js based interface for communicating with
 the [Crazyflie 2.0 Nano Quadcoptor](https://www.bitcraze.io/crazyflie-2/) over Bluetooth Low-Energy.
 
 
 ## Usage
 
 ### Download
-Download the zip or clone the GitHub repo into the 'node-modules' folder of your project
+Clone the GitHub repo into the 'node-modules' folder of your project
 
-`git clone https://github.com/ppossemiers/crazyflie-ble`
+`git clone https://github.com/MangoFliers/CrazyFlieBLE`
 
 ### Install
 Run `npm install` from within the directory to grab any needed dependencies
