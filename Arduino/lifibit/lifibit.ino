@@ -13,6 +13,9 @@ void setup() {
 }
 
 void loop() {
+  
+  analogWrite(led, 255);
+  
   currentBit = !currentBit;
   
   sendBit(led, currentBit);
